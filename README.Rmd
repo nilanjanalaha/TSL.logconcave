@@ -1,0 +1,64 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# TSL.logconcave
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+
+
+## Installation
+
+You can install the released version of TSL.logconcave  from [GitHub](https://github.com/) with:
+
+```{r}
+#Uninstalling previous versions, if installed
+devtools::install_github("nilanjanalaha/TSL.logconcave", force=TRUE)
+```
+
+
+This package calculates an estimator for estimating the location shift in a two sample location model. Suppose \[X=\mu+Z_1\] and \[Y=\mu+\Delta+Z_2\] where $Z_1$ and $Z_2$ are two i.i.d. random variables with common density $g_0$. We also assume that $g_0$ is log-concave. 
+
+Let us simulate some Toy data from the above model. We will take $\mu=0$, $\Delta=0.50$, and we take $g_0$ to be the standard normal density. 
+
+```{r simulation}
+library(TSL.logconcave)
+x <- rnorm(100, 0, 1)
+y <- rnorm(50, 0.5 ,1) 
+```
+
+Note that the two samples can have different sample sizes. Then we create a list called datam which represents the dataset.
+
+```{r data}
+datam <- list(x=x, y=y)
+```
+
+## The one step estimator
+Our estimator is a one step estimator, which can be calculated using the function pooled.smoothed. The output is a vector, whose first element is the estimate of $\Delta$, and second element is an estimator of the Fisher information for estimating $\Delta$. Type "?pooled_smoothed" in the R console for more details. 
+
+```{r intro}
+temp <- pooled_smoothed(datam, eta = 0.001)
+# estimator
+temp[1]
+```
+
+Here eta is the parameter which controls the truncation level. Our suggestion is to use the default level of eta, which is 0. Simulations show that this is the most efficient
+estimator in terms of asymptotic variance.
+```{r intro 2}
+temp <- pooled_smoothed(datam)
+# estimator
+temp[1]
+```

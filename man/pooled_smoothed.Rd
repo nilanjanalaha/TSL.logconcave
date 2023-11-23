@@ -4,13 +4,13 @@
 \alias{pooled_smoothed}
 \title{Logconcave estimator of the location-shift in the two sample model.}
 \usage{
-pooled_smoothed(dat, eta = 1e-04)
+pooled_smoothed(dat, eta = 0)
 }
 \arguments{
 \item{dat}{A list with two components: x and y, each being vector of possibly different lengths; represents the data.}
 
 \item{eta}{A fraction between 0 and 1/2. Corresponds to the truncation level of the one step estimator.
-The default is 0.0001.}
+The default is 0.}
 }
 \value{
 A vector of length two.
@@ -32,7 +32,7 @@ for \eqn{\Delta} provided \eqn{g} is log-concave.
 truncation. See Saha et al. (2023) for more details.
 }
 \examples{
-x <- rlogis(100); y <- rlogis(150) + 0.1; 
+x <- rlogis(100); y <- rlogis(150) + 0.1;
 pooled_smoothed(list(x=x, y=y), eta = 0.0001)
 }
 \references{

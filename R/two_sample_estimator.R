@@ -7,33 +7,33 @@
 #' \eqn{g} is an unknown log-concave density. This function computes
 #' a one step estimator to estimte \eqn{\Delta}. This estimator relies on
 #' the smoothed log-concave MLE estimator from the package \code{\link{logcondens}} to estimate \eqn{g}, and  is root-n consistent
-#' for \eqn{\Delta} provided \eqn{g} is log-concave. 
-#' 
-#' 
+#' for \eqn{\Delta} provided \eqn{g} is log-concave.
+#'
+#'
 #' @param dat       A list with two components: x and y, each being vector of possibly different lengths; represents the data.
 #' @param eta A fraction between 0 and 1/2. Corresponds to the truncation level of the one step estimator.
-#'              The default is 0.0001.
-#' 
+#'              The default is 0.
+#'
 #' @details \code{eta:} If eta is zero, the function computes the one step estimator  without any
 #'                      truncation. See Saha et al. (2023) for more details.
-#'                        
-#'@return   A vector of length two.   
+#'
+#'@return   A vector of length two.
 #'\itemize{
 #'\item \code{estimate:}  The estimated value of \eqn{\Delta}.
 #'\item \code{FI:} The estimated Fisher information for estimating \eqn{\Delta}.
 #'}
-#'  
-#'@references Saha R., Dey P., Laha N. (2023). \emph{Revisiting the two-sample location model 
+#'
+#'@references Saha R., Dey P., Laha N. (2023). \emph{Revisiting the two-sample location model
 #' with log-concavity assumption}. submitted.
 #'@author \href{https://www.nilanjana91.de/}{Nilanjana Laha}
 #' (maintainer), \email{nlaha@@tamu.edu}.\cr
 #'Ridhiman Saha, \email{riddhimansaha@@fas.harvard.edu}
-#' 
+#'
 #' @examples
-#' x <- rlogis(100); y <- rlogis(150) + 0.1; 
+#' x <- rlogis(100); y <- rlogis(150) + 0.1;
 #' pooled_smoothed(list(x=x, y=y), eta = 0.0001)
 #' @export
-pooled_smoothed <- function(dat, eta = 0.0001) {
+pooled_smoothed <- function(dat, eta = 0) {
   x <- dat$x; y <- dat$y
   n_1 <- length(x)
   n_2 <- length(y)
@@ -41,11 +41,11 @@ pooled_smoothed <- function(dat, eta = 0.0001) {
   # Center and merge data
   mu_bar <- mean(x)
   delta_bar <- mean(y) - mean(x)
-  
+
   # center data and estimate densities
   x_centered <- x - mu_bar
   y_centered <- y - mu_bar - delta_bar
-  
+
   # Pool samples
   z <- c(x - mu_bar, y - mu_bar - delta_bar)
   z <- sort(z, index.return = TRUE)
@@ -53,7 +53,7 @@ pooled_smoothed <- function(dat, eta = 0.0001) {
   x_indices <- which(z$ix <= n_1)
   y_indices <- which(z$ix > n_1)
   z <- z$x # This is our pooled sample, sorted.
-  
+
   # Fit log-concave smoothed density on z
   res <- logcondens::logConDens(z, smoothed = TRUE)
   knots <- res$knots
@@ -63,12 +63,12 @@ pooled_smoothed <- function(dat, eta = 0.0001) {
   # std. dev. of gaussian kernel so that var of est smoothed density
   # equals sample s.d.
   gam <- sqrt(res$sig^2 - VarFn)
-  
+
   # Function to find (CDF - eta) based on fitted density
   findCDF <- function(x, res, eta=0) {
       -eta + as.numeric(logcondens::evaluateLogConDens(x, res, which=5)[, "smooth.CDF"])
   }
-  
+
   # Function for finding quantiles
   findQuantile <- function(eta, res) {
     # if eta = 0 or eta = 1, return some extreme value
@@ -123,10 +123,10 @@ pooled_smoothed <- function(dat, eta = 0.0001) {
     }
     xi_1
   }
-  
+
   xi_1 <- findQuantile(eta, res)
   xi_2 <- findQuantile(1-eta, res)
-  
+
   # Evaluate \psi' at sample points
   # First find g'
   g_slope <- function(x, knots, slopes, intercepts, gam) {
@@ -149,7 +149,7 @@ pooled_smoothed <- function(dat, eta = 0.0001) {
   }
   psi_slopes <- g_slope(z, knots, slopes, intercepts, gam) /
     logcondens::evaluateLogConDens(z, res, which=4)[, "smooth.density"]
-  
+
   # Find truncated information
   integrand <- function(x, res, gam) {
     slopes <- diff(res$phi[res$IsKnot == 1]) / diff(knots)
@@ -160,13 +160,13 @@ pooled_smoothed <- function(dat, eta = 0.0001) {
   }
   information <- integrate(integrand, lower=xi_1, upper=xi_2,
                            res=res, gam=gam)$value
-  
+
   # One-step estimator
   include <- (z >= xi_1) & (z <= xi_2)
   # Now this is the integral w.r.t. empirical cdf
   delta_hat <- delta_bar +
     (mean(psi_slopes[x_indices] * include[x_indices]) / information) -
     (mean(psi_slopes[y_indices] * include[y_indices]) / information)
-  
+
   return(c(delta_hat, information))
 }
