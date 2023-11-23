@@ -1,0 +1,17 @@
+Package: TSL.logconcave
+Title: Estimates the location shift in a two sample location estimation problem
+Version: 0.0.0.9000
+Authors@R: 
+    person("Nilanjana", "Laha", , "nlaha@tamu.edu", role = c("aut", "cre"),
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: Estimates the location shift in a two sample location shift problem
+ with the additional assumption that the underlying densities are log-concave.
+License: MIT 
+Imports: logcondens,
+         rmutil
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
